@@ -1,42 +1,69 @@
-import React from 'react';
-import { Container, Typography, Button, Grid, Card, CardContent } from '@mui/material';
+'use client';
+import React, { useState, useEffect } from 'react';
+import { Container, Typography, Button } from '@mui/material';
 import Link from 'next/link';
+import { fetchPurchasedItems, deletarItem, updateItemQuantity } from '../utils/apiFunctions';
+import PurchasedProductList from '../components/ComprasProductList';
 
-// Função para buscar os produtos comprados da API
-async function fetchPurchasedItems() {
-  const res = await fetch('http://127.0.0.1:8000/api/v1/comprar/');
-  if (!res.ok) {
-    throw new Error('Failed to fetch purchased items');
-  }
-  return res.json();
-}
+export default function PurchasedProducts() {
+  const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-// Componente da página de Produtos Comprados
-export default async function PurchasedProducts() {
-  const purchasedItems = await fetchPurchasedItems(); // Chamando a função de fetch diretamente no componente
+  useEffect(() => {
+    async function loadPurchasedItems() {
+      try {
+        const items = await fetchPurchasedItems();
+        // Calcular o total_price para cada item inicialmente
+        const itemsWithTotal = items.map(item => ({
+          ...item,
+          total_price: item.product_price * item.quantity,
+        }));
+        setPurchasedItems(itemsWithTotal);
+      } catch (error) {
+        console.error("Erro ao carregar os produtos comprados:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadPurchasedItems();
+  }, []);
+
+  const handleDeleteItem = async (id: number) => {
+    const wasDeleted = await deletarItem(id);
+    if (wasDeleted) {
+      setPurchasedItems((prevItems) => prevItems.filter(item => item.id !== id));
+    }
+  };
+
+  const handleEditItem = async (id: number, newQuantity: number) => {
+    try {
+      const updatedItem = await updateItemQuantity(id, newQuantity);
+      setPurchasedItems((prevItems) =>
+        prevItems.map(item =>
+          item.id === id
+            ? { ...item, quantity: updatedItem.quantity, total_price: updatedItem.quantity * item.product_price }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error("Erro ao atualizar a quantidade:", error);
+    }
+  };
 
   return (
     <Container>
       <Typography variant="h4" component="h1" gutterBottom>
         Produtos Comprados
       </Typography>
-      <Grid container spacing={3}>
-        {purchasedItems.length === 0 ? (
-          <Typography variant="h6">Nenhum produto comprado.</Typography>
-        ) : (
-          purchasedItems.map((item: any) => (
-            <Grid item xs={12} md={6} lg={4} key={item.id}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6">{item.product_name}</Typography>
-                  <Typography variant="body2">Quantidade: {item.quantity}</Typography>
-                  <Typography variant="body2">Preço: R$ {item.price}</Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))
-        )}
-      </Grid>
+      {isLoading ? (
+        <Typography variant="h6">Carregando...</Typography>
+      ) : (
+        <PurchasedProductList 
+          purchasedItems={purchasedItems} 
+          handleDeleteItem={handleDeleteItem} 
+          handleEditItem={handleEditItem} 
+        />
+      )}
       <Link href="/" passHref>
         <Button variant="contained" color="primary" style={{ marginTop: '20px' }}>
           Voltar para Home
