@@ -1,5 +1,5 @@
 export async function fetchPurchasedItems() {
-    const res = await fetch('http://127.0.0.1:8000/api/v1/comprar/');
+    const res = await fetch('http://127.0.0.1:8000/api/v1/comprar/list/');
     if (!res.ok) {
       throw new Error('Failed to fetch purchased items');
     }
@@ -10,7 +10,7 @@ export async function fetchPurchasedItems() {
     const confirmDelete = window.confirm("Você tem certeza que deseja excluir este item?");
     if (confirmDelete) {
       try {
-        const res = await fetch(`http://127.0.0.1:8000/api/v1/comprar/${id}/`, {
+        const res = await fetch(`http://127.0.0.1:8000/api/v1/comprar/${id}/delete/`, {
           method: 'DELETE',
         });
         if (res.ok) {
@@ -31,7 +31,7 @@ export async function fetchPurchasedItems() {
  
 // Função para atualizar a quantidade de um item
 export async function updateItemQuantity(id: number, newQuantity: number) {
-    const res = await fetch(`http://127.0.0.1:8000/api/v1/comprar/${id}/`, {
+    const res = await fetch(`http://127.0.0.1:8000/api/v1/comprar/${id}/update/`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
