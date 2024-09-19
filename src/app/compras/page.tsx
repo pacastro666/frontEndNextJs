@@ -4,6 +4,7 @@ import { Container, Typography, Button } from '@mui/material';
 import Link from 'next/link';
 import { fetchPurchasedItems, deletarItem, updateItemQuantity } from '../utils/apiFunctions';
 import PurchasedProductList from '../components/ComprasProductList';
+import CustomToolbar from '../components/CustomToolbar'; // Novo componente Toolbar
 
 export default function PurchasedProducts() {
   const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
@@ -51,6 +52,11 @@ export default function PurchasedProducts() {
   };
 
   return (
+    <>
+     {/* Usando a Toolbar separada */}
+     <CustomToolbar />
+
+    
     <Container>
       <Typography variant="h4" component="h1" gutterBottom>
         Produtos Comprados
@@ -64,11 +70,8 @@ export default function PurchasedProducts() {
           handleEditItem={handleEditItem} 
         />
       )}
-      <Link href="/" passHref>
-        <Button variant="contained" color="primary" style={{ marginTop: '20px' }}>
-          Voltar para Home
-        </Button>
-      </Link>
+
     </Container>
+    </>
   );
 }
