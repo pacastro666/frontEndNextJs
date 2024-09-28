@@ -4,3 +4,6 @@ para rodar o projeto deve primeiramente clonar o projeto
 2- acessa a pasta cd frontEndNextJs
 3- npm install
 4-npm run dev
+
+para rodar a documentacao no storybook 
+npm run storybook
